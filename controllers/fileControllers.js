@@ -24,8 +24,6 @@ const getFileByCategory = async (req, res) => {
       where: { id: id_category }
     })
 
-    console.log(dataCategory, '<-- data category');
-
     if (!dataCategory) {
       return errorJSON(res, 'this category is not found', 404)
     } else {
@@ -33,7 +31,12 @@ const getFileByCategory = async (req, res) => {
         where: { id_category: id_category }
       })
   
-      resJSON(res, dataFile, 'get file by category successfully')
+      res.status(200).json({
+        status: 200,
+        message: 'get file by category successfully',
+        category: dataCategory.name,
+        data: dataFile
+      })
     }
 
   } catch (error) {
