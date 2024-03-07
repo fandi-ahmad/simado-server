@@ -1,4 +1,4 @@
-const { File, view_file } = require('../models')
+const { File, view_file, Category_file } = require('../models')
 const path = require('path')
 const fs = require('fs')
 const { updateData, createData, deleteData, getData } = require('../repository/crudAction')
@@ -11,6 +11,31 @@ const getAllFile = async (req, res) => {
   try {
     const dataFile = await getData(view_file)
     resJSON(res, dataFile, 'get'+mesage)
+  } catch (error) {
+    errorJSON(res)
+  }
+}
+
+const getFileByCategory = async (req, res) => {
+  try {
+    const { id_category } = req.params
+
+    const dataCategory = await Category_file.findOne({
+      where: { id: id_category }
+    })
+
+    console.log(dataCategory, '<-- data category');
+
+    if (!dataCategory) {
+      return errorJSON(res, 'this category is not found', 404)
+    } else {
+      const dataFile = await view_file.findAll({
+        where: { id_category: id_category }
+      })
+  
+      resJSON(res, dataFile, 'get file by category successfully')
+    }
+
   } catch (error) {
     errorJSON(res)
   }
@@ -101,4 +126,4 @@ const updateFile = async (req, res) => {
   }
 }
 
-module.exports = { getAllFile, createFile, deleteFile, updateFile }
+module.exports = { getAllFile, createFile, deleteFile, updateFile, getFileByCategory }
