@@ -7,8 +7,22 @@ const message = ' student file successfully'
 
 const getAllStudentFile = async (req, res) => {
   try {
-    const dataStudentFile = await getData(Student_file)
-    resJSON(res, dataStudentFile, 'get'+message) 
+    const { id_study_year, id_class_name } = req.body
+
+    if (id_study_year && id_class_name) {
+      const dataStudentFile = await Student_file.findAll({
+        where: {
+          id_study_year: id_study_year,
+          id_class_name: id_class_name
+        }
+      })
+      resJSON(res, dataStudentFile, 'get'+message)
+
+    } else {
+      const dataStudentFile = await getData(Student_file)
+      resJSON(res, dataStudentFile, 'get'+message)
+
+    }
   } catch (error) {
     errorJSON(res)
   }
@@ -16,18 +30,19 @@ const getAllStudentFile = async (req, res) => {
 
 const createStudentFile = async (req, res) => {
   try {
-    const { id_student, file_name, classes, semester, category } = req.body
+    const { id_student, id_study_year, id_class_name, file_name, semester, category } = req.body
 
-    if (!id_student || !file_name || !category || !req.file) {
+    if (!id_student || !id_student || !id_class_name || !file_name || !category || !req.file) {
       return errorJSON(res, 'request has not been fulfilled', 400)
     } else {
       const file_upload = req.file.path
 
       await createData(Student_file, {
         id_student: id_student,
+        id_study_year: id_study_year,
+        id_class_name: id_class_name,
         file: file_upload,
         file_name: file_name,
-        class: classes,
         semester: semester,
         category: category
       })

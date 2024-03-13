@@ -19,17 +19,34 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT'
       },
+      id_study_year: {
+        type: Sequelize.UUID,
+        references: {
+          model: 'Study_years',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
+      },
+      id_class_name: {
+        type: Sequelize.UUID,
+        references: {
+          model: 'Class_names',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
+      },
       file: {
         type: Sequelize.STRING
       },
       file_name: {
         type: Sequelize.STRING
       },
-      class: {
-        type: Sequelize.STRING
-      },
       semester: {
-        type: Sequelize.STRING
+        allowNull: false,
+        defaultValue: '1',
+        type: Sequelize.ENUM('1', '2')
       },
       category: {
         allowNull: false,

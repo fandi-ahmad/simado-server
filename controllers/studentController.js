@@ -24,7 +24,7 @@ const createStudent = async (req, res) => {
         where: { nisn: nisn }
       })
       if (dataStudent) {
-        return errorJSON(res, 'NISN is already in use', 400)
+        return errorJSON(res, 'NISN is already in use', 406)
       } else {
         await createData(Student, {nisn: nisn, name: name, year: year})
         resJSON(res, '', 'create'+message)
@@ -62,7 +62,7 @@ const updateStudent = async (req, res) => {
         id: { [Sequelize.Op.not]: id } // Mengabaikan data yang sedang diperbarui
       }
     });
-    if (existingDataWithNisn) return errorJSON(res, 'NISN is already in use', 400)
+    if (existingDataWithNisn) return errorJSON(res, 'NISN is already in use', 406)
     
     updateData(Student, id, {nisn, name, year})
     resJSON(res, '', 'update'+message)

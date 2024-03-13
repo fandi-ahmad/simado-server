@@ -11,14 +11,17 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Student_file.belongsTo(models.Student, { foreignKey: 'id_student' })
+      Student_file.belongsTo(models.Study_year, { foreignKey: 'id_study_year' })
+      Student_file.belongsTo(models.Class_name, { foreignKey: 'id_class_name' })
     }
   }
   Student_file.init({
     id_student: DataTypes.STRING,
+    id_study_year: DataTypes.STRING,
+    id_class_name: DataTypes.STRING,
     file: DataTypes.STRING,
     file_name: DataTypes.STRING,
-    class: DataTypes.STRING,
-    semester: DataTypes.STRING,
+    semester: DataTypes.ENUM('1', '2'),
     category: DataTypes.ENUM('rapor', 'ijazah')
   }, {
     sequelize,
