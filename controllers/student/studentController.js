@@ -1,6 +1,6 @@
-const { Student, Sequelize } = require('../models')
-const { resJSON, errorJSON } = require('../repository/resJSON.js')
-const { deleteData, updateData, createData, getData } = require('../repository/crudAction.js')
+const { Student, Sequelize } = require('../../models')
+const { resJSON, errorJSON } = require('../../repository/resJSON.js.js')
+const { deleteData, updateData, createData, getData } = require('../../repository/crudAction.js')
 
 const message = ' student successfully'
 

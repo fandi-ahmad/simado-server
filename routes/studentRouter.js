@@ -1,8 +1,8 @@
 const router = require("express").Router()
-const { getAllStudent, createStudent, deleteStudent, updateStudent } = require('../controllers/studentController')
-const { getAllStudentFile, createStudentFile, deleteStudentFile, updateStudentFile } = require('../controllers/studentFileController')
-const { getAllStudyYear, createStudyYear, deleteStudyYear, updateStudyYear, getStudyYearById } = require('../controllers/studyYearController')
-const { getAllClassName, createClassName, deleteClassName, updateClassName, getClassNameById } = require('../controllers/classNameController')
+const { getAllStudent, createStudent, deleteStudent, updateStudent } = require('../controllers/student/studentController')
+const { getAllStudentFile, createStudentFile, deleteStudentFile, updateStudentFile } = require('../controllers/student/studentFileController')
+const { getAllStudyYear, createStudyYear, deleteStudyYear, updateStudyYear, getStudyYearById } = require('../controllers/student/studyYearController')
+const { getAllClassName, createClassName, deleteClassName, updateClassName, getClassNameById } = require('../controllers/student/classNameController')
 
 // student
 router.get('/', getAllStudent)

@@ -1,6 +1,6 @@
-const { Class_name } = require('../models/index.js')
-const { resJSON, errorJSON } = require('../repository/resJSON.js.js')
-const { deleteData, updateData, createData, getData } = require('../repository/crudAction.js')
+const { Class_name } = require('../../models')
+const { resJSON, errorJSON } = require('../../repository/resJSON.js.js')
+const { deleteData, updateData, createData, getData } = require('../../repository/crudAction.js')
 
 const message = ' class successfully'
 

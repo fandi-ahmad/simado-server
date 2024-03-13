@@ -1,6 +1,6 @@
-const { Study_year } = require('../models')
-const { resJSON, errorJSON } = require('../repository/resJSON.js')
-const { deleteData, updateData, createData, getData } = require('../repository/crudAction.js')
+const { Study_year } = require('../../models/index.js')
+const { resJSON, errorJSON } = require('../../repository/resJSON.js.js')
+const { deleteData, updateData, createData, getData } = require('../../repository/crudAction.js')
 
 const message = ' study year successfully'
 

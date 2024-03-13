@@ -1,6 +1,6 @@
-const { Student_file } = require('../models')
-const { resJSON, errorJSON } = require('../repository/resJSON.js')
-const { deleteData, updateData, createData, getData } = require('../repository/crudAction.js')
+const { Student_file } = require('../../models/index.js')
+const { resJSON, errorJSON } = require('../../repository/resJSON.js.js')
+const { deleteData, updateData, createData, getData } = require('../../repository/crudAction.js')
 const path = require('path')
 const fs = require('fs')
 const message = ' student file successfully'
@@ -17,12 +17,11 @@ const getAllStudentFile = async (req, res) => {
         }
       })
       resJSON(res, dataStudentFile, 'get'+message)
-
     } else {
       const dataStudentFile = await getData(Student_file)
       resJSON(res, dataStudentFile, 'get'+message)
-
     }
+
   } catch (error) {
     errorJSON(res)
   }
