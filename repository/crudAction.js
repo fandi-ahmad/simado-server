@@ -1,8 +1,8 @@
 const { v4: uuidv4 } = require('uuid');
 
-const getData = async (model) => {
+const getData = async (model, order = 'DESC') => {
   const data = await model.findAll({
-    order: [[ 'createdAt', 'DESC' ]]
+    order: [[ 'createdAt', order ]]
   })
   return data
 }

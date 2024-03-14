@@ -1,14 +1,12 @@
 const { Category_file, File } = require('../models')
 const { resJSON, errorJSON } = require('../repository/resJSON.js')
-const { deleteData, updateData, createData } = require('../repository/crudAction.js')
+const { deleteData, updateData, createData, getData } = require('../repository/crudAction.js')
 
 const message = ' category successfully'
 
 const getAllCategory = async (req, res) => {
   try {
-    const dataCategory = await Category_file.findAll({
-      order: [[ 'createdAt', 'DESC' ]]
-    })
+    const dataCategory = await getData(Category_file, 'ASC')
     resJSON(res, dataCategory, 'get'+message) 
   } catch (error) {
     errorJSON(res)
@@ -56,8 +54,8 @@ const deleteCategory = async (req, res) => {
 
 const updateCategory = async (req, res) => {
   try {
-    const { uuid, name } = req.body
-    updateData(Category_file, uuid, {name})
+    const { id, name } = req.body
+    updateData(Category_file, id, {name})
     resJSON(res, '', 'update'+message)
   } catch (error) {
     errorJSON(res)
