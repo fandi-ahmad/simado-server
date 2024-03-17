@@ -6,8 +6,30 @@ const message = ' student successfully'
 
 const getAllStudent = async (req, res) => {
   try {
-    const dataStudent = await getData(Student)
-    resJSON(res, dataStudent, 'get'+message) 
+    // const dataStudent = await getData(Student)
+    // resJSON(res, dataStudent, 'get'+message)
+
+    const currentPage = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+    const orderBy = req.query.order || 'updatedAt'
+    const orderValue = req.query.order_value || 'DESC'
+
+    const { count, rows } = await Student.findAndCountAll({
+      order: [[ orderBy, orderValue ]],
+      offset: (currentPage - 1) * limit,
+      limit: limit
+    })
+
+    const result = {
+      status: 200,
+      message: 'get student successfully',
+      page: currentPage,
+      limit: limit,
+      total_page: Math.ceil(count/limit),
+      total_data: count,
+      data: rows,
+    }
+    res.status(200).json(result)
   } catch (error) {
     errorJSON(res)
   }
@@ -18,7 +40,7 @@ const createStudent = async (req, res) => {
     const { nisn, name, year } = req.body
 
     if (!nisn || !name || !year) {
-      return errorJSON(res, 'request has not been fulfilled', 400)
+      return errorJSON(res, 'request has not been fulfilled', 406)
     } else {
       const dataStudent = await Student.findOne({
         where: { nisn: nisn }
