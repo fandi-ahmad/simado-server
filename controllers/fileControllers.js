@@ -1,16 +1,34 @@
-const { File, view_file, Category_file, Sequelize } = require('../models')
+const { File, view_file, Category_file } = require('../models')
 const path = require('path')
 const fs = require('fs')
 const { updateData, createData, deleteData, getData } = require('../repository/crudAction')
 const { resJSON, errorJSON } = require('../repository/resJSON.js')
+const { Op } = require('sequelize')
 
 
 const getAllFile = async (req, res) => {
   try {
     const currentPage = parseInt(req.query.page) || 1
     const limit = parseInt(req.query.limit) || 10
+    const orderBy = req.query.order || 'updatedAt'
+    const orderValue = req.query.order_value || 'DESC'
+    const search =  req.query.search || ''
 
     const { count, rows } = await view_file.findAndCountAll({
+      where: {
+        [Op.or]: [
+          {
+            file_name: { [Op.substring]: search.toLowerCase()},
+          },
+          {
+            format: { [Op.substring]: search.toLowerCase()},
+          },
+          {
+            source: { [Op.substring]: search.toLowerCase()},
+          },
+        ]
+      },
+      order: [[ orderBy, orderValue ]],
       offset: (currentPage - 1) * limit,
       limit: limit
     })
@@ -38,6 +56,7 @@ const getFileByCategory = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10
     const orderBy = req.query.order || 'updatedAt'
     const orderValue = req.query.order_value || 'DESC'
+    const search =  req.query.search || ''
 
     const dataCategory = await Category_file.findOne({
       where: { id: id_category }
@@ -47,7 +66,20 @@ const getFileByCategory = async (req, res) => {
       return errorJSON(res, 'this category is not found', 404)
     } else {
       const { count, rows } = await view_file.findAndCountAll({
-        where: { id_category: id_category },
+        where: {
+          id_category: id_category,
+          [Op.or]: [
+            {
+              file_name: { [Op.substring]: search.toLowerCase()},
+            },
+            {
+              format: { [Op.substring]: search.toLowerCase()},
+            },
+            {
+              source: { [Op.substring]: search.toLowerCase()},
+            },
+          ]
+        },
         order: [[ orderBy, orderValue ]],
         offset: (currentPage - 1) * limit,
         limit: limit
@@ -68,6 +100,7 @@ const getFileByCategory = async (req, res) => {
     }
   } catch (error) {
     errorJSON(res)
+    console.log(error, '<-- error get file by category');
   }
 }
 
