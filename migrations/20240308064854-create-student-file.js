@@ -44,8 +44,6 @@ module.exports = {
         type: Sequelize.STRING
       },
       semester: {
-        allowNull: false,
-        defaultValue: '1',
         type: Sequelize.ENUM('1', '2')
       },
       category: {
