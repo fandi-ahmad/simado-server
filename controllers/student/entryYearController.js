@@ -37,7 +37,7 @@ const deleteEntryYear = async (req, res) => {
     })
 
     if (dataStudent) {
-      return errorJSON(res, 'Cannot be deleted, because it contains student data', 406);
+      return errorJSON(res, 'Tidak dapat dihapus, karena berisi data siswa!', 406);
     } else {
       const data = await deleteData(Entry_year, id)
       if (!data) return errorJSON(res, 'data is not found', 404);
