@@ -1,6 +1,7 @@
 const { Student, Sequelize, Entry_year } = require('../../models')
 const { resJSON, errorJSON } = require('../../repository/resJSON.js.js')
 const { deleteData, updateData, createData, getData } = require('../../repository/crudAction.js')
+const { Op } = require('sequelize')
 
 const message = ' student successfully'
 
@@ -10,6 +11,7 @@ const getAllStudent = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10
     const orderBy = req.query.order || 'updatedAt'
     const orderValue = req.query.order_value || 'DESC'
+    const search =  req.query.search || ''
 
     let queryOptions = {
       order: [[ orderBy, orderValue ]],
@@ -19,8 +21,30 @@ const getAllStudent = async (req, res) => {
 
 
     if (req.query.entry_year) {
-      queryOptions.where = { id_entry_year: req.query.entry_year };
+      queryOptions.include = [
+        {
+          model: Entry_year,
+          attributes: ['year'], // Hanya ambil kolom 'year' dari Entry_year
+          where: { id: req.query.entry_year } // Filter berdasarkan id_entry_year
+        }
+      ];
+    } else {
+      queryOptions.include = [
+        {
+          model: Entry_year,
+          attributes: ['year'], // Hanya ambil kolom 'year' dari Entry_year
+          where: { id: Sequelize.col('Student.id_entry_year') } // Filter berdasarkan id_entry_year dari Student
+        }
+      ];
     }
+    
+    queryOptions.where = {
+      [Op.or]: [
+        { nisn: { [Op.substring]: search.toLowerCase() } },
+        { name: { [Op.substring]: search.toLowerCase() } },
+      ]
+    };
+
 
     const { count, rows } = await Student.findAndCountAll(queryOptions);
 
@@ -36,6 +60,7 @@ const getAllStudent = async (req, res) => {
     res.status(200).json(result)
   } catch (error) {
     errorJSON(res)
+    console.log(error, '<-- errro get student');
   }
 }
 
