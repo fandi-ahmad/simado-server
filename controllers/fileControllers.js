@@ -3,14 +3,47 @@ const path = require('path')
 const fs = require('fs')
 const { updateData, createData, deleteData, getData } = require('../repository/crudAction')
 const { resJSON, errorJSON } = require('../repository/resJSON.js')
+const { Op } = require('sequelize')
 
-
-const mesage = ' file successfully'
 
 const getAllFile = async (req, res) => {
   try {
-    const dataFile = await getData(view_file)
-    resJSON(res, dataFile, 'get'+mesage)
+    const currentPage = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+    const orderBy = req.query.order || 'updatedAt'
+    const orderValue = req.query.order_value || 'DESC'
+    const search =  req.query.search || ''
+
+    const { count, rows } = await view_file.findAndCountAll({
+      where: {
+        [Op.or]: [
+          {
+            file_name: { [Op.substring]: search.toLowerCase()},
+          },
+          {
+            format: { [Op.substring]: search.toLowerCase()},
+          },
+          {
+            source: { [Op.substring]: search.toLowerCase()},
+          },
+        ]
+      },
+      order: [[ orderBy, orderValue ]],
+      offset: (currentPage - 1) * limit,
+      limit: limit
+    })
+
+    const result = {
+      status: 200,
+      message: 'get file successfully',
+      page: currentPage,
+      limit: limit,
+      total_page: Math.ceil(count/limit),
+      total_data: count,
+      data: rows,
+    }
+
+    res.status(200).json(result)
   } catch (error) {
     errorJSON(res)
   }
@@ -19,6 +52,11 @@ const getAllFile = async (req, res) => {
 const getFileByCategory = async (req, res) => {
   try {
     const { id_category } = req.params
+    const currentPage = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+    const orderBy = req.query.order || 'updatedAt'
+    const orderValue = req.query.order_value || 'DESC'
+    const search =  req.query.search || ''
 
     const dataCategory = await Category_file.findOne({
       where: { id: id_category }
@@ -27,20 +65,42 @@ const getFileByCategory = async (req, res) => {
     if (!dataCategory) {
       return errorJSON(res, 'this category is not found', 404)
     } else {
-      const dataFile = await view_file.findAll({
-        where: { id_category: id_category }
+      const { count, rows } = await view_file.findAndCountAll({
+        where: {
+          id_category: id_category,
+          [Op.or]: [
+            {
+              file_name: { [Op.substring]: search.toLowerCase()},
+            },
+            {
+              format: { [Op.substring]: search.toLowerCase()},
+            },
+            {
+              source: { [Op.substring]: search.toLowerCase()},
+            },
+          ]
+        },
+        order: [[ orderBy, orderValue ]],
+        offset: (currentPage - 1) * limit,
+        limit: limit
       })
-  
-      res.status(200).json({
+
+      const result = {
         status: 200,
         message: 'get file by category successfully',
+        page: currentPage,
+        limit: limit,
+        total_page: Math.ceil(count/limit),
+        total_data: count,
         category: dataCategory.name,
-        data: dataFile
-      })
+        data: rows,
+      }
+  
+      res.status(200).json(result)
     }
-
   } catch (error) {
     errorJSON(res)
+    console.log(error, '<-- error get file by category');
   }
 }
 
@@ -100,8 +160,6 @@ const deleteFile = async (req, res) => {
 const updateFile = async (req, res) => {
   try {
     const { id, file_name, number, source, format, year, id_category } = req.body
-
-    console.log(req.body, '<-- data req.body');
 
     const dataFile = await File.findOne({
       where: { id: id }

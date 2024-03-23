@@ -1,37 +1,98 @@
-const { Student, Sequelize } = require('../../models')
+const { Student, Sequelize, Entry_year } = require('../../models')
 const { resJSON, errorJSON } = require('../../repository/resJSON.js.js')
 const { deleteData, updateData, createData, getData } = require('../../repository/crudAction.js')
+const { Op } = require('sequelize')
 
 const message = ' student successfully'
 
 const getAllStudent = async (req, res) => {
   try {
-    const dataStudent = await getData(Student)
-    resJSON(res, dataStudent, 'get'+message) 
+    const currentPage = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+    const orderBy = req.query.order || 'updatedAt'
+    const orderValue = req.query.order_value || 'DESC'
+    const search =  req.query.search || ''
+
+    let queryOptions = {
+      order: [[ orderBy, orderValue ]],
+      offset: (currentPage - 1) * limit,
+      limit: limit
+    };
+
+
+    if (req.query.entry_year) {
+      queryOptions.include = [
+        {
+          model: Entry_year,
+          attributes: ['year'], // Hanya ambil kolom 'year' dari Entry_year
+          where: { id: req.query.entry_year } // Filter berdasarkan id_entry_year
+        }
+      ];
+    } else {
+      queryOptions.include = [
+        {
+          model: Entry_year,
+          attributes: ['year'], // Hanya ambil kolom 'year' dari Entry_year
+          where: { id: Sequelize.col('Student.id_entry_year') } // Filter berdasarkan id_entry_year dari Student
+        }
+      ];
+    }
+    
+    queryOptions.where = {
+      [Op.or]: [
+        { nisn: { [Op.substring]: search.toLowerCase() } },
+        { name: { [Op.substring]: search.toLowerCase() } },
+      ]
+    };
+
+
+    const { count, rows } = await Student.findAndCountAll(queryOptions);
+
+    const result = {
+      status: 200,
+      message: 'get student successfully',
+      page: currentPage,
+      limit: limit,
+      total_page: Math.ceil(count/limit),
+      total_data: count,
+      data: rows,
+    }
+    res.status(200).json(result)
   } catch (error) {
     errorJSON(res)
+    console.log(error, '<-- errro get student');
   }
 }
 
 const createStudent = async (req, res) => {
   try {
-    const { nisn, name, year } = req.body
+    const { nisn, name, id_entry_year = '' } = req.body
 
-    if (!nisn || !name || !year) {
-      return errorJSON(res, 'request has not been fulfilled', 400)
+    if (!nisn || !name) {
+      return errorJSON(res, 'request has not been fulfilled', 406)
     } else {
       const dataStudent = await Student.findOne({
         where: { nisn: nisn }
       })
+
+      const dataEntryYear = await Entry_year.findOne({
+        where: { id: id_entry_year }
+      })
+
+      if (!dataEntryYear) {
+        return errorJSON(res, 'Pilih tahun masuk terlebih dahulu', 406)
+      }
+
       if (dataStudent) {
-        return errorJSON(res, 'NISN is already in use', 406)
+        return errorJSON(res, 'NISN sudah digunakan', 406)
       } else {
-        await createData(Student, {nisn: nisn, name: name, year: year})
+        await createData(Student, {nisn: nisn, name: name, id_entry_year: id_entry_year})
         resJSON(res, '', 'create'+message)
       }
     }
   } catch (error) {
     errorJSON(res)
+    console.log(error, '<-- error create student');
   }
 }
 

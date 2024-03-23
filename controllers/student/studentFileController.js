@@ -8,16 +8,33 @@ const message = ' student file successfully'
 const getAllStudentFile = async (req, res) => {
   try {
     const { id_study_year, id_class_name, semester } = req.query
+    const currentPage = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+    const orderBy = req.query.order || 'updatedAt'
+    const orderValue = req.query.order_value || 'DESC'
 
     if (id_study_year && id_class_name) {
-      const dataStudentFile = await View_student_file.findAll({
+      const { count, rows } = await View_student_file.findAndCountAll({
         where: {
           id_study_year: id_study_year,
           id_class_name: id_class_name,
           semester: semester
-        }
+        },
+        order: [[ orderBy, orderValue ]],
+        offset: (currentPage - 1) * limit,
+        limit: limit
       })
-      resJSON(res, dataStudentFile, 'get'+message)
+
+      const result = {
+        status: 200,
+        message: 'get student file successfully',
+        page: currentPage,
+        limit: limit,
+        total_page: Math.ceil(count/limit),
+        total_data: count,
+        data: rows,
+      }
+      res.status(200).json(result)
     } else {
       const dataStudentFile = await getData(View_student_file)
       resJSON(res, dataStudentFile, 'get'+message)

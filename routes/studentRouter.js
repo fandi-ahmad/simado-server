@@ -3,6 +3,7 @@ const { getAllStudent, createStudent, deleteStudent, updateStudent } = require('
 const { getAllStudentFile, createStudentFile, deleteStudentFile, updateStudentFile } = require('../controllers/student/studentFileController')
 const { getAllStudyYear, createStudyYear, deleteStudyYear, updateStudyYear, getStudyYearById } = require('../controllers/student/studyYearController')
 const { getAllClassName, createClassName, deleteClassName, updateClassName, getClassNameById } = require('../controllers/student/classNameController')
+const { getAllEntryYear, createEntryYear, deleteEntryYear, updateEntryYear } = require('../controllers/student/entryYearController')
 
 // student
 router.get('/', getAllStudent)
@@ -29,5 +30,11 @@ router.get('/class/:id', getClassNameById)
 router.post('/class/create', createClassName)
 router.delete('/class/delete/:id', deleteClassName)
 router.put('/class/update', updateClassName)
+
+// student/entry-year
+router.get('/entry-year/', getAllEntryYear)
+router.post('/entry-year/create', createEntryYear)
+router.delete('/entry-year/delete/:id', deleteEntryYear)
+router.put('/entry-year/update', updateEntryYear)
 
 module.exports = router
