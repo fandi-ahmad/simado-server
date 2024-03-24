@@ -24,9 +24,6 @@ module.exports = {
       format: {
         type: Sequelize.STRING
       },
-      year: {
-        type: Sequelize.STRING
-      },
       id_user: {
         type: Sequelize.UUID,
         allowNull:false,
