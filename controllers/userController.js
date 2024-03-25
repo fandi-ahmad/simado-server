@@ -4,6 +4,7 @@ const { sign, verify } = require('jsonwebtoken')
 const { genSalt, hash, compare } = require('bcrypt')
 const { Op } = require('sequelize')
 const { errorJSON, resJSON } = require('../repository/resJSON.js')
+const { deleteData } = require('../repository/crudAction.js')
 
 const getAllUser = async (req, res) => {
   try {
@@ -109,7 +110,7 @@ const updateUser = async (req, res) => {
     } else {
       await User.update({ username: username }, {
         where: {
-          uuid: uuid
+          id: id
         }
       })
     }
@@ -118,6 +119,19 @@ const updateUser = async (req, res) => {
   } catch (error) {
     errorJSON(res)
     console.log(error, '<-- error update user');
+  }
+}
+
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const data = await deleteData(User, id)
+    if (!data) return errorJSON(res, 'data is not found', 404);
+
+    resJSON(res, '', 'delete user successfully')
+  } catch (error) {
+    errorJSON(res)
   }
 }
 
@@ -180,4 +194,4 @@ const getUserLogin = async (req, res) => {
 }
 
 
-module.exports = { createUser, getAllUser, updateUser }
+module.exports = { createUser, getAllUser, updateUser, deleteUser }
