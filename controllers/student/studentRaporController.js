@@ -1,24 +1,24 @@
-const { Student_file, View_student_file } = require('../../models/index.js')
+const { Rapor_file, View_rapor_file } = require('../../models/index.js')
 const { resJSON, errorJSON } = require('../../repository/resJSON.js.js')
 const { deleteData, updateData, createData, getData } = require('../../repository/crudAction.js')
 const path = require('path')
 const fs = require('fs')
 const message = ' student file successfully'
 
-const getAllStudentFile = async (req, res) => {
+const getAllRapor = async (req, res) => {
   try {
-    const { id_study_year, id_class_name, semester } = req.query
+    const { id_study_year, id_class_name, semester } = req.query || null
     const currentPage = parseInt(req.query.page) || 1
     const limit = parseInt(req.query.limit) || 10
     const orderBy = req.query.order || 'updatedAt'
     const orderValue = req.query.order_value || 'DESC'
 
     if (id_study_year && id_class_name) {
-      const { count, rows } = await View_student_file.findAndCountAll({
+      const { count, rows } = await View_rapor_file.findAndCountAll({
         where: {
           id_study_year: id_study_year,
           id_class_name: id_class_name,
-          semester: semester
+          semester: semester,
         },
         order: [[ orderBy, orderValue ]],
         offset: (currentPage - 1) * limit,
@@ -36,7 +36,7 @@ const getAllStudentFile = async (req, res) => {
       }
       res.status(200).json(result)
     } else {
-      const dataStudentFile = await getData(View_student_file)
+      const dataStudentFile = await getData(View_rapor_file)
       resJSON(res, dataStudentFile, 'get'+message)
     }
 
@@ -45,35 +45,31 @@ const getAllStudentFile = async (req, res) => {
   }
 }
 
-const createStudentFile = async (req, res) => {
+const createRapor = async (req, res) => {
   try {
-    const { id_student, id_study_year, id_class_name, file_name, semester, category } = req.body
+    const { id_student, id_study_year, id_class_name, semester } = req.body
 
-    if (!id_student || !id_study_year || !category) {
+    if (!id_student || !id_study_year || !id_class_name || !semester) {
       return errorJSON(res, 'request has not been fulfilled', 406)
     } else {
 
       if (req.file) {
         const file_upload = req.file.path
 
-        await createData(Student_file, {
+        await createData(Rapor_file, {
           id_student: id_student,
           id_study_year: id_study_year,
           id_class_name: id_class_name,
           file: file_upload,
-          file_name: file_name,
           semester: semester,
-          category: category
         })
         resJSON(res, '', 'create'+message)
       } else {
-        await createData(Student_file, {
+        await createData(Rapor_file, {
           id_student: id_student,
           id_study_year: id_study_year,
           id_class_name: id_class_name,
-          file_name: file_name,
           semester: semester,
-          category: category
         })
         resJSON(res, '', 'create'+message)
       }
@@ -92,11 +88,11 @@ const removeFile = (filePath) => {
   fs.unlink(filePath, err => console.log(err, '<-- error remove file'))
 }
 
-const deleteStudentFile = async (req, res) => {
+const deleteRapor = async (req, res) => {
   try {
     const { id } = req.params
 
-    const data = await deleteData(Student_file, id)
+    const data = await deleteData(Rapor_file, id)
     if (!data) return errorJSON(res, 'data is not found', 404);
     if (data.file) removeFile(data.file)
 
@@ -106,15 +102,15 @@ const deleteStudentFile = async (req, res) => {
   }
 }
 
-const updateStudentFile = async (req, res) => {
+const updateRapor = async (req, res) => {
   try {
-    const { id, id_student, id_study_year, id_class_name, file_name, semester, category } = req.body
+    const { id, id_student, id_study_year, id_class_name, semester } = req.body
 
-    if (!id_student || !id_study_year || !category) {
+    if (!id_student || !id_study_year) {
       return errorJSON(res, 'request has not been fulfilled', 406)
     } else {
 
-      const dataStudentFile = await Student_file.findOne({
+      const dataStudentFile = await Rapor_file.findOne({
         where: { id: id }
       })
   
@@ -129,7 +125,7 @@ const updateStudentFile = async (req, res) => {
         }
       }
 
-      await updateData(Student_file, id, { id_student, id_study_year, id_class_name, file_name, semester, category })
+      await updateData(Rapor_file, id, { id_student, id_study_year, id_class_name, semester })
 
       dataStudentFile.save()
       
@@ -140,4 +136,4 @@ const updateStudentFile = async (req, res) => {
   }
 }
 
-module.exports = { getAllStudentFile, createStudentFile, deleteStudentFile, updateStudentFile }
+module.exports = { getAllRapor, createRapor, deleteRapor, updateRapor }

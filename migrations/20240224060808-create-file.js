@@ -24,16 +24,6 @@ module.exports = {
       format: {
         type: Sequelize.STRING
       },
-      id_user: {
-        type: Sequelize.UUID,
-        allowNull:false,
-        references: {
-          model: 'Users',
-          key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'RESTRICT'
-      },
       id_category: {
         type: Sequelize.UUID,
         allowNull:false,

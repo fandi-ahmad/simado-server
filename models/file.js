@@ -10,7 +10,6 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      File.belongsTo(models.User, { foreignKey: 'id_user' })
       File.belongsTo(models.Category_file, { foreignKey: 'id_category' })
     }
   }
@@ -21,7 +20,6 @@ module.exports = (sequelize, DataTypes) => {
     source: DataTypes.STRING,
     format: DataTypes.STRING,
     file: DataTypes.STRING,
-    id_user: DataTypes.STRING,
     id_category: DataTypes.STRING,
   }, {
     sequelize,

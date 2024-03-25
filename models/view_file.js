@@ -22,7 +22,6 @@ module.exports = (sequelize, DataTypes) => {
     format: DataTypes.STRING,
     createdAt: DataTypes.STRING,
     updatedAt: DataTypes.STRING,
-    username: DataTypes.STRING,
     id_category: DataTypes.STRING,
     category_name: DataTypes.STRING
   }, {
