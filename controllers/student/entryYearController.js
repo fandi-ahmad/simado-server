@@ -6,7 +6,9 @@ const message = ' entry year successfully'
 
 const getAllEntryYear = async (req, res) => {
   try {
-    const data = await getData(Entry_year, 'ASC')
+    const data = await Entry_year.findAll({
+      order: [[ 'year', 'ASC' ]]
+    })
     resJSON(res, data, 'get'+message)
   } catch (error) {
     errorJSON(res)

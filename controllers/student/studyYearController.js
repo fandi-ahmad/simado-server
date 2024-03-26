@@ -6,7 +6,9 @@ const message = ' study year successfully'
 
 const getAllStudyYear = async (req, res) => {
   try {
-    const data = await getData(Study_year, 'ASC')
+    const data = await Study_year.findAll({
+      order: [[ 'study_year', 'ASC' ]]
+    })
     resJSON(res, data, 'get'+message) 
   } catch (error) {
     errorJSON(res)

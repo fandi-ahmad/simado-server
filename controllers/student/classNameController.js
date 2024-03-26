@@ -6,7 +6,9 @@ const message = ' class successfully'
 
 const getAllClassName = async (req, res) => {
   try {
-    const data = await getData(Class_name, 'ASC')
+    const data = await Class_name.findAll({
+      order: [[ 'class_name', 'ASC' ]]
+    })
     resJSON(res, data, 'get'+message)
   } catch (error) {
     errorJSON(res)
