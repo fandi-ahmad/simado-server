@@ -1,4 +1,4 @@
-const { Study_year } = require('../../models/index.js')
+const { Study_year, Rapor_file } = require('../../models/index.js')
 const { resJSON, errorJSON } = require('../../repository/resJSON.js.js')
 const { deleteData, updateData, createData, getData } = require('../../repository/crudAction.js')
 
@@ -51,8 +51,17 @@ const deleteStudyYear = async (req, res) => {
   try {
     const { id } = req.params
 
-    const data = await deleteData(Study_year, id)
-    if (!data) return errorJSON(res, 'data is not found', 404);
+    const dataRapor = await Rapor_file.findOne({
+      where: { id_study_year: id }
+    })
+
+    if (dataRapor) {
+      return errorJSON(res, 'Tidak dapat dihapus, karena memiliki data rapor siswa!', 406)
+    } else {
+      const data = await deleteData(Study_year, id)
+      if (!data) return errorJSON(res, 'data is not found', 404);
+    }
+
 
     resJSON(res, '', 'delete'+message)
   } catch (error) {

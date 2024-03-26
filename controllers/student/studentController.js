@@ -1,4 +1,4 @@
-const { Student, Sequelize, Entry_year } = require('../../models')
+const { Student, Sequelize, Entry_year, Rapor_file } = require('../../models')
 const { resJSON, errorJSON } = require('../../repository/resJSON.js.js')
 const { deleteData, updateData, createData, getData } = require('../../repository/crudAction.js')
 const { Op } = require('sequelize')
@@ -113,9 +113,17 @@ const deleteStudent = async (req, res) => {
   try {
     const { id } = req.params
 
-    const data = await deleteData(Student, id)
-    if (!data) return errorJSON(res, 'data is not found', 404);
-    if (data.ijazah_file) removeFile(data.ijazah_file)
+    const raporByStudent = await Rapor_file.findOne({
+      where: { id_student: id }
+    })
+
+    if (raporByStudent) {
+      return errorJSON(res, 'Tidak dapat dihapus, karena memiliki data rapor!', 406)
+    } else {
+      const data = await deleteData(Student, id)
+      if (!data) return errorJSON(res, 'Data is not found', 404);
+      if (data.ijazah_file) removeFile(data.ijazah_file)
+    }
 
     resJSON(res, '', 'delete'+message)
   } catch (error) {
