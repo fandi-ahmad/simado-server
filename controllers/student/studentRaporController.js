@@ -3,6 +3,7 @@ const { resJSON, errorJSON } = require('../../repository/resJSON.js.js')
 const { deleteData, updateData, createData, getData } = require('../../repository/crudAction.js')
 const path = require('path')
 const fs = require('fs')
+const { Op } = require('sequelize')
 const message = ' student file successfully'
 
 const getAllRapor = async (req, res) => {
@@ -12,6 +13,7 @@ const getAllRapor = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10
     const orderBy = req.query.order || 'updatedAt'
     const orderValue = req.query.order_value || 'DESC'
+    const search =  req.query.search || ''
 
     if (id_study_year && id_class_name) {
       const { count, rows } = await View_rapor_file.findAndCountAll({
@@ -19,6 +21,10 @@ const getAllRapor = async (req, res) => {
           id_study_year: id_study_year,
           id_class_name: id_class_name,
           semester: semester,
+          [Op.or]: [
+            { nisn: { [Op.substring]: search.toLowerCase() } },
+            { student_name: { [Op.substring]: search.toLowerCase() } },
+          ]
         },
         order: [[ orderBy, orderValue ]],
         offset: (currentPage - 1) * limit,
@@ -42,6 +48,7 @@ const getAllRapor = async (req, res) => {
 
   } catch (error) {
     errorJSON(res)
+    console.log(error, '<-- error get rapor');
   }
 }
 
