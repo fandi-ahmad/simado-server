@@ -1,4 +1,4 @@
-const { Class_name, Sequelize, View_rapor_file } = require('../../models')
+const { Class_name, Sequelize, View_rapor_file, Rapor_file } = require('../../models')
 const { resJSON, errorJSON } = require('../../repository/resJSON.js.js')
 const { deleteData, updateData, createData, getData } = require('../../repository/crudAction.js')
 
@@ -84,12 +84,21 @@ const deleteClassName = async (req, res) => {
   try {
     const { id } = req.params
 
-    const data = await deleteData(Class_name, id)
-    if (!data) return errorJSON(res, 'data is not found', 404);
+    const dataRapor = await Rapor_file.findOne({
+      where: { id_class_name: id }
+    })
+
+    if (dataRapor) {
+      return errorJSON(res, 'Tidak dapat dihapus, karena memiliki data rapor siswa!', 406)
+    } else {
+      const data = await deleteData(Class_name, id)
+      if (!data) return errorJSON(res, 'data is not found', 404);
+    }
 
     resJSON(res, '', 'delete'+message)
   } catch (error) {
     errorJSON(res)
+    console.log(error, '<-- error delete class name');
   }
 }
 

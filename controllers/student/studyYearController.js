@@ -75,7 +75,7 @@ const deleteStudyYear = async (req, res) => {
   try {
     const { id } = req.params
 
-    const dataRapor = await Rapor_file.findOne({
+    const dataRapor = await View_rapor_file.findOne({
       where: { id_study_year: id }
     })
 
@@ -90,6 +90,7 @@ const deleteStudyYear = async (req, res) => {
     resJSON(res, '', 'delete'+message)
   } catch (error) {
     errorJSON(res)
+    console.log(error, '<-- error delete study year');
   }
 }
 
