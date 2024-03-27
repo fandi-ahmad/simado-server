@@ -1,4 +1,4 @@
-const { Study_year, Rapor_file } = require('../../models/index.js')
+const { Study_year, View_rapor_file, Sequelize } = require('../../models/index.js')
 const { resJSON, errorJSON } = require('../../repository/resJSON.js.js')
 const { deleteData, updateData, createData, getData } = require('../../repository/crudAction.js')
 
@@ -9,7 +9,29 @@ const getAllStudyYear = async (req, res) => {
     const data = await Study_year.findAll({
       order: [[ 'study_year', 'ASC' ]]
     })
-    resJSON(res, data, 'get'+message) 
+
+    const raporCount = await View_rapor_file.findAndCountAll({
+      attributes: ['study_year', [Sequelize.fn('COUNT', Sequelize.col('study_year')), 'total']],
+      group: ['study_year']
+    })
+
+    let countsMap = {};
+    raporCount.count.map(item => {
+      countsMap[item.study_year] = item.count
+    })
+
+    const dataWithRaporCount = data.map(item => ({
+      ...item.toJSON(),
+      count: countsMap[item.study_year] || 0 // Menggunakan nilai count dari countsMap atau 0 jika tidak ada
+    }));
+
+    const resDataJson = {
+      status: 200,
+      message: 'ok',
+      data: dataWithRaporCount,
+    }
+
+    res.status(200).json(resDataJson)
   } catch (error) {
     errorJSON(res)
   }
