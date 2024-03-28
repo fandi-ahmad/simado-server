@@ -61,10 +61,18 @@ const createStudyYear = async (req, res) => {
     const { study_year } = req.body
 
     if (!study_year) {
-      return errorJSON(res, 'study year is empty', 400)
+      return errorJSON(res, 'Permintaan belum terpenuhi!', 406)
     } else {
-      await createData(Study_year, {study_year: study_year})
-      resJSON(res, '', 'create'+message)
+      const dataStudyYear = await Study_year.findOne({
+        where: { study_year: study_year }
+      })
+
+      if (dataStudyYear) {
+        return errorJSON(res, 'Tahun ajaran ini sudah digunakan!', 406)
+      } else {
+        await createData(Study_year, {study_year: study_year})
+        resJSON(res, '', 'create'+message)
+      }
     }
   } catch (error) {
     errorJSON(res)
@@ -97,6 +105,16 @@ const deleteStudyYear = async (req, res) => {
 const updateStudyYear = async (req, res) => {
   try {
     const { id, study_year } = req.body
+
+    // Memeriksa apakah ada data lain yang sama
+    const existingData = await Study_year.findOne({
+      where: {
+        study_year: study_year,
+        id: { [Sequelize.Op.not]: id } // Mengabaikan data yang sedang diperbarui
+      }
+    });
+    if (existingData) return errorJSON(res, 'Tahun ajaran ini sudah digunakan!', 406)
+
     updateData(Study_year, id, {study_year})
     resJSON(res, '', 'update'+message)
   } catch (error) {
