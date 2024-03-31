@@ -3,31 +3,32 @@ const { getAllStudent, createStudent, deleteStudent, updateStudent } = require('
 const { getAllStudyYear, createStudyYear, deleteStudyYear, updateStudyYear, getStudyYearById } = require('../controllers/student/studyYearController')
 const { getAllClassName, createClassName, deleteClassName, updateClassName, getClassNameById } = require('../controllers/student/classNameController')
 const { getAllEntryYear, createEntryYear, deleteEntryYear, updateEntryYear } = require('../controllers/student/entryYearController')
+const { verificationToken } = require('../middleware/verifyToken')
 
 // student
-router.get('/', getAllStudent)
-router.post('/create', createStudent)
-router.delete('/delete/:id', deleteStudent)
-router.put('/update', updateStudent)
+router.get('/', verificationToken, getAllStudent)
+router.post('/create', verificationToken, createStudent)
+router.delete('/delete/:id', verificationToken, deleteStudent)
+router.put('/update', verificationToken, updateStudent)
 
 // student/study (year)
-router.get('/study/', getAllStudyYear)
-router.get('/study/:id', getStudyYearById)
-router.post('/study/create', createStudyYear)
-router.delete('/study/delete/:id', deleteStudyYear)
-router.put('/study/update', updateStudyYear)
+router.get('/study/', verificationToken, getAllStudyYear)
+router.get('/study/:id', verificationToken, getStudyYearById)
+router.post('/study/create', verificationToken, createStudyYear)
+router.delete('/study/delete/:id', verificationToken, deleteStudyYear)
+router.put('/study/update', verificationToken, updateStudyYear)
 
 // student/class
-router.get('/class/', getAllClassName)
-router.get('/class/:id', getClassNameById)
-router.post('/class/create', createClassName)
-router.delete('/class/delete/:id', deleteClassName)
-router.put('/class/update', updateClassName)
+router.get('/class/', verificationToken, getAllClassName)
+router.get('/class/:id', verificationToken, getClassNameById)
+router.post('/class/create', verificationToken, createClassName)
+router.delete('/class/delete/:id', verificationToken, deleteClassName)
+router.put('/class/update', verificationToken, updateClassName)
 
 // student/entry-year
-router.get('/entry-year/', getAllEntryYear)
-router.post('/entry-year/create', createEntryYear)
-router.delete('/entry-year/delete/:id', deleteEntryYear)
-router.put('/entry-year/update', updateEntryYear)
+router.get('/entry-year/', verificationToken, getAllEntryYear)
+router.post('/entry-year/create', verificationToken, createEntryYear)
+router.delete('/entry-year/delete/:id', verificationToken, deleteEntryYear)
+router.put('/entry-year/update', verificationToken, updateEntryYear)
 
 module.exports = router

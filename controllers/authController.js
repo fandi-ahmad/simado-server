@@ -1,23 +1,19 @@
 const { User} = require('../models')
 const { sign, verify } = require('jsonwebtoken')
 const { genSalt, hash, compare } = require('bcrypt')
+const { errorJSON } = require('../repository/resJSON.js')
 
 
 const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body
-    const cookiesnya = req.cookies
+    console.log(req.cookies, '<-- semua request cookies, dari fungsi loginUser()');
     const user = await User.findAll({
       where: {
         username: username
       }
     })
 
-    console.log(cookiesnya, '<-- cookie');
-
-    // console.log(user[0].dataValues, '<-- user ditemukan saat login');
-    // console.log(user[0].dataValues.password, '<-- password user');
-    // console.log(user[0].password, '<-- password');
 
     if (!user[0]) {
       return res.status(404).json({
@@ -30,39 +26,33 @@ const loginUser = async (req, res) => {
     if(!match) return res.status(400).json({message: 'password is wrong'})
 
 
-    const userUuid = user[0].uuid
+    const userId = user[0].id
     const userUsername = user[0].username
 
-    const accessToken = sign({userUuid, userUsername}, process.env.SIMADO_ACCESS_TOKEN, {
+    const accessToken = sign({userId, userUsername}, process.env.SIMADO_ACCESS_TOKEN, {
       expiresIn: '30s'
     })
 
-    const refreshToken = sign({userUuid, userUsername}, process.env.SIMADO_REFRESH_TOKEN, {
+    const refreshToken = sign({userId, userUsername}, process.env.SIMADO_REFRESH_TOKEN, {
       expiresIn: '1d'
     })
 
     await User.update({refresh_token: refreshToken}, {
-      where: { uuid: userUuid }
+      where: { id: userId }
     })
-
-    console.log(userUsername, '<-- username');
-    console.log(userUuid, '<-- uuid user');
-    console.log(accessToken, '<-- access token');
-    console.log(refreshToken, '<-- refresh token');
-
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       maxAge: 1000 * 30,
       secure: true,
-      sameSite: 'none',
+      sameSite: 'strict',
     })
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24,
       secure: true,
-      sameSite: 'none',
+      sameSite: 'strict',
       // signed: true
     })
 
@@ -84,21 +74,17 @@ const getRefreshToken = async (req, res) => {
     const refreshToken = req.cookies.refreshToken
 
     if(!refreshToken) return res.sendStatus(401)
-
-    const user = await User.findOne({
+    const user = await User.findAll({
       where: {
         refresh_token: refreshToken
       }
     })
-
-    if(!user) return res.sendStatus(403)
-
+    if(!user[0]) return res.sendStatus(403)
     verify(refreshToken, process.env.SIMADO_REFRESH_TOKEN, (err, decoded) => {
       if(err) return res.sendStatus(403)
-      
-      const userUuid = user.uuid
-      const userUsername = user.username
-      const accessToken = sign({userUuid, userUsername}, process.env.SIMADO_ACCESS_TOKEN, {
+      const userId = user[0].id
+      const userUsername = user[0].username
+      const accessToken = sign({userId, userUsername}, process.env.SIMADO_ACCESS_TOKEN, {
         expiresIn: '30s'
       })
 
@@ -115,7 +101,7 @@ const getRefreshToken = async (req, res) => {
     })
 
   } catch (error) {
-    res.status(500).json({ status: 500, message: 'Internal server error' });
+    // res.status(500).json({ status: 500, message: 'Internal server error' });
     console.log(error, '<-- error get refresh token');
   }
 }
