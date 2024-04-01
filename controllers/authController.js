@@ -67,7 +67,7 @@ const getUserLogin = async (req, res) => {
     if (req.cookies.refreshToken) {
       const refreshToken = req.cookies.refreshToken
       const user = await User.findOne({
-        attributes: ['id', 'username'],
+        attributes: ['id', 'username', 'role'],
         where: {
           refresh_token: refreshToken
         }
@@ -77,7 +77,7 @@ const getUserLogin = async (req, res) => {
         // user by refresh_token tidak ditemukan
         return errorJSON(res, 'Belum melakukan login!', 406)
       } else {
-        return resJSON(res)
+        return resJSON(res, user)
       }
     } else {
       // tidak ada refreshToken dari cookies
