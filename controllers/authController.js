@@ -94,13 +94,13 @@ const logoutUser = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken
     if(!refreshToken) return res.sendStatus(204)
-    const user = await User.findAll({
+    const user = await User.findOne({
       where: {
         refresh_token: refreshToken
       }
     })
-    if(!user[0]) return res.sendStatus(204)
-    const userId = user[0].id
+    if(!user) return res.sendStatus(204)
+    const userId = user.id
     await User.update({refresh_token: null}, {
       where: {id: userId}
     })
@@ -113,4 +113,4 @@ const logoutUser = async (req, res) => {
   }
 }
 
-module.exports = { loginUser, getUserLogin }
+module.exports = { loginUser, getUserLogin, logoutUser }
