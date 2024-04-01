@@ -18,17 +18,14 @@ const getAllUser = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
-    const { username, password } = req.body
+    const { username, password, role } = req.body
     const randomUUID = uuidv4();
 
-    const timeNow = new Date()
-    timeNow.setHours(timeNow.getHours() + 8);
-
-    const user = await User.findAll({
+    const user = await User.findOne({
       where: { username: username }
     })
     
-    if (user[0]) {
+    if (user) {
       // check if email is available in database
       res.status(422).json({
         status: 422,
@@ -50,8 +47,7 @@ const createUser = async (req, res) => {
         id: randomUUID,
         password: hashPassword,
         username: username,
-        createdAt: timeNow,
-        updateAt: timeNow
+        role: role,
       })
 
       res.status(200).json({
@@ -67,7 +63,7 @@ const createUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const { id, password, username, new_password }  = req.body
+    const { id, password, username, new_password, role }  = req.body
 
     // const refreshToken = req.cookies.refreshToken
 
@@ -91,12 +87,12 @@ const updateUser = async (req, res) => {
   
         if (!match) {
           // password tidak sesuai
-          return errorJSON(res, 'username or password is wrong', 400)
+          return errorJSON(res, 'Password tidak lama sesuai!', 406)
         } else {
           const salt = await genSalt()
           const hashPassword = await hash(new_password, salt)
   
-          await User.update({ username: username, password: hashPassword }, {
+          await User.update({ username: username, password: hashPassword, role: role }, {
             where: {
               id: id
             }
@@ -108,7 +104,7 @@ const updateUser = async (req, res) => {
 
     // jika tidak memperbarui password baru
     } else {
-      await User.update({ username: username }, {
+      await User.update({ username: username, role: role }, {
         where: {
           id: id
         }
