@@ -1,68 +1,51 @@
 const { User} = require('../models')
 const { sign, verify } = require('jsonwebtoken')
-const { genSalt, hash, compare } = require('bcrypt')
+const { compare } = require('bcrypt')
+const { errorJSON, resJSON } = require('../repository/resJSON.js')
 
 
 const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body
-    const cookiesnya = req.cookies
-    const user = await User.findAll({
+    const user = await User.findOne({
       where: {
         username: username
       }
     })
 
-    console.log(cookiesnya, '<-- cookie');
+    if (!user) return errorJSON(res, 'Username atau password salah!', 406)
+     
+    const match = await compare(password, user.password)
+    // password salah
+    if(!match) return errorJSON(res, 'Username atau password salah!', 406)
 
-    // console.log(user[0].dataValues, '<-- user ditemukan saat login');
-    // console.log(user[0].dataValues.password, '<-- password user');
-    // console.log(user[0].password, '<-- password');
+    const userId = user.id
+    const userUsername = user.username
 
-    if (!user[0]) {
-      return res.status(404).json({
-        status: 404,
-        message: 'username not found'
-      });
-    }
-
-    const match = await compare(password, user[0].password)
-    if(!match) return res.status(400).json({message: 'password is wrong'})
-
-
-    const userUuid = user[0].uuid
-    const userUsername = user[0].username
-
-    const accessToken = sign({userUuid, userUsername}, process.env.SIMADO_ACCESS_TOKEN, {
+    const accessToken = sign({userId, userUsername}, process.env.SIMADO_ACCESS_TOKEN, {
       expiresIn: '30s'
     })
 
-    const refreshToken = sign({userUuid, userUsername}, process.env.SIMADO_REFRESH_TOKEN, {
+    const refreshToken = sign({userId, userUsername}, process.env.SIMADO_REFRESH_TOKEN, {
       expiresIn: '1d'
     })
 
     await User.update({refresh_token: refreshToken}, {
-      where: { uuid: userUuid }
+      where: { id: userId }
     })
-
-    console.log(userUsername, '<-- username');
-    console.log(userUuid, '<-- uuid user');
-    console.log(accessToken, '<-- access token');
-    console.log(refreshToken, '<-- refresh token');
-
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       maxAge: 1000 * 30,
       secure: true,
-      sameSite: 'none',
+      sameSite: 'strict',
     })
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24,
       secure: true,
-      sameSite: 'none',
+      sameSite: 'strict',
       // signed: true
     })
 
@@ -74,49 +57,36 @@ const loginUser = async (req, res) => {
     })
 
   } catch (error) {
-    res.status(500).json({ status: 500, message: 'Internal server error' });
+    errorJSON(res)
     console.log(error, '<-- error login');
   }
 }
 
-const getRefreshToken = async (req, res) => {
+const getUserLogin = async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken
-
-    if(!refreshToken) return res.sendStatus(401)
-
-    const user = await User.findOne({
-      where: {
-        refresh_token: refreshToken
+    if (req.cookies.refreshToken) {
+      const refreshToken = req.cookies.refreshToken
+      const user = await User.findOne({
+        attributes: ['id', 'username', 'role'],
+        where: {
+          refresh_token: refreshToken
+        }
+      })
+  
+      if (!user) {
+        // user by refresh_token tidak ditemukan
+        return errorJSON(res, 'Belum melakukan login!', 406)
+      } else {
+        return resJSON(res, user)
       }
-    })
-
-    if(!user) return res.sendStatus(403)
-
-    verify(refreshToken, process.env.SIMADO_REFRESH_TOKEN, (err, decoded) => {
-      if(err) return res.sendStatus(403)
-      
-      const userUuid = user.uuid
-      const userUsername = user.username
-      const accessToken = sign({userUuid, userUsername}, process.env.SIMADO_ACCESS_TOKEN, {
-        expiresIn: '30s'
-      })
-
-      res.cookie('accessToken', accessToken, {
-        httpOnly: true,
-        maxAge: 1000 * 30,
-        secure: true,
-        sameSite: 'none',
-      })
-
-      res.json({
-        status: 200,
-      })
-    })
+    } else {
+      // tidak ada refreshToken dari cookies
+      return errorJSON(res, 'Belum melakukan login!', 406)
+    }
 
   } catch (error) {
-    res.status(500).json({ status: 500, message: 'Internal server error' });
-    console.log(error, '<-- error get refresh token');
+    errorJSON(res)
+    console.log(error, '<-- error get user login');
   }
 }
 
@@ -124,13 +94,13 @@ const logoutUser = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken
     if(!refreshToken) return res.sendStatus(204)
-    const user = await User.findAll({
+    const user = await User.findOne({
       where: {
         refresh_token: refreshToken
       }
     })
-    if(!user[0]) return res.sendStatus(204)
-    const userId = user[0].id
+    if(!user) return res.sendStatus(204)
+    const userId = user.id
     await User.update({refresh_token: null}, {
       where: {id: userId}
     })
@@ -143,4 +113,4 @@ const logoutUser = async (req, res) => {
   }
 }
 
-module.exports = { loginUser, getRefreshToken }
+module.exports = { loginUser, getUserLogin, logoutUser }

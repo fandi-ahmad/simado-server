@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Entry_year.init({
-    year: DataTypes.STRING
+    year: DataTypes.CHAR(4)
   }, {
     sequelize,
     modelName: 'Entry_year',

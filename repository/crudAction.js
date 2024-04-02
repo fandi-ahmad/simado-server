@@ -8,13 +8,8 @@ const getData = async (model, order = 'DESC') => {
 }
 
 const createData = async (model, data) => {
-  const timeNow = new Date()
-  timeNow.setHours(timeNow.getHours() + 8);
-
   const dataToCreate = {
     id: uuidv4(),
-    createdAt: timeNow,
-    updatedAt: timeNow,
     ...data
   }
 
@@ -37,9 +32,6 @@ const deleteData = async (model, idSelected) => {
 }
 
 const updateData = async (model, idSelected, data) => {
-  const timeNow = new Date()
-  timeNow.setHours(timeNow.getHours() + 8);
-
   const dataById = await model.findOne({
     where: { id: idSelected }
   })
@@ -49,7 +41,6 @@ const updateData = async (model, idSelected, data) => {
       dataById[key] = data[key];
     }
   }
-  dataById.updatedAt = timeNow  // not working
 
   await dataById.save()
 }

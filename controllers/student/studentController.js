@@ -1,4 +1,4 @@
-const { Student, Sequelize, Entry_year } = require('../../models')
+const { Student, Sequelize, Entry_year, Rapor_file } = require('../../models')
 const { resJSON, errorJSON } = require('../../repository/resJSON.js.js')
 const { deleteData, updateData, createData, getData } = require('../../repository/crudAction.js')
 const { Op } = require('sequelize')
@@ -80,13 +80,18 @@ const createStudent = async (req, res) => {
       })
 
       if (!dataEntryYear) {
-        return errorJSON(res, 'Pilih tahun masuk terlebih dahulu', 406)
+        return errorJSON(res, 'Pilih tahun masuk terlebih dahulu!', 406)
       }
 
       if (dataStudent) {
         return errorJSON(res, 'NISN sudah digunakan', 406)
       } else {
-        await createData(Student, {nisn: nisn, name: name, id_entry_year: id_entry_year})
+        if (req.file) {
+          const file_upload = req.file.path
+          await createData(Student, {nisn: nisn, name: name, id_entry_year: id_entry_year, ijazah_file: file_upload})
+        } else {
+          await createData(Student, {nisn: nisn, name: name, id_entry_year: id_entry_year})
+        }
         resJSON(res, '', 'create'+message)
       }
     }
@@ -96,12 +101,29 @@ const createStudent = async (req, res) => {
   }
 }
 
+const removeFile = (filePath) => {
+  // get location image
+  filePath = path.join(__dirname, '../..', filePath)
+
+  // remove file by path
+  fs.unlink(filePath, err => console.log(err, '<-- error remove file'))
+}
+
 const deleteStudent = async (req, res) => {
   try {
     const { id } = req.params
 
-    const data = await deleteData(Student, id)
-    if (!data) return errorJSON(res, 'data is not found', 404);
+    const raporByStudent = await Rapor_file.findOne({
+      where: { id_student: id }
+    })
+
+    if (raporByStudent) {
+      return errorJSON(res, 'Tidak dapat dihapus, karena memiliki data rapor!', 406)
+    } else {
+      const data = await deleteData(Student, id)
+      if (!data) return errorJSON(res, 'Data is not found', 404);
+      if (data.ijazah_file) removeFile(data.ijazah_file)
+    }
 
     resJSON(res, '', 'delete'+message)
   } catch (error) {
@@ -123,9 +145,26 @@ const updateStudent = async (req, res) => {
         id: { [Sequelize.Op.not]: id } // Mengabaikan data yang sedang diperbarui
       }
     });
-    if (existingDataWithNisn) return errorJSON(res, 'NISN is already in use', 406)
+    if (existingDataWithNisn) return errorJSON(res, 'NISN sudah digunakan!', 406)
+
+    const dataStudent = await Student.findOne({
+      where: { id: id }
+    })
+
+    if (req.file) {
+      const file_upload = req.file.path
+
+      if (!dataStudent.ijazah_file) {
+        dataStudent.ijazah_file = file_upload
+      } else {
+        removeFile(dataStudent.ijazah_file)
+        dataStudent.ijazah_file = file_upload
+      }
+    }
     
-    updateData(Student, id, {nisn, name, year})
+    await updateData(Student, id, {nisn, name, year})
+    dataStudent.save()
+
     resJSON(res, '', 'update'+message)
   } catch (error) {
     errorJSON(res)

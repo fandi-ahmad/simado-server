@@ -100,16 +100,15 @@ const getFileByCategory = async (req, res) => {
     }
   } catch (error) {
     errorJSON(res)
-    console.log(error, '<-- error get file by category');
   }
 }
 
 const createFile = async (req, res) => {
   try {
-    const { file_name, id_user, id_category, number, source, format, year } = req.body
+    const { file_name, id_category, number, source, format, year } = req.body
     const file_upload = req.file.path
 
-    if (!file_upload) return errorJSON(res, 'please, upload file!!', 400);
+    if (!file_upload) return errorJSON(res, 'please, upload file!!', 406);
 
     createData(File, {
       file: file_upload,
@@ -118,7 +117,6 @@ const createFile = async (req, res) => {
       source: source,
       format: format,
       year: year,
-      id_user: id_user,
       id_category: id_category
     })
 

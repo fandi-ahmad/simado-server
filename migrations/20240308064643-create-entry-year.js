@@ -10,7 +10,7 @@ module.exports = {
         primaryKey: true
       },
       year: {
-        type: Sequelize.STRING
+        type: Sequelize.CHAR(4)
       },
       createdAt: {
         allowNull: false,

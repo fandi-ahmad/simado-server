@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Student_files', {
+    await queryInterface.createTable('Rapor_files', {
       id: {
         allowNull: false,
         type: Sequelize.UUID,
@@ -40,16 +40,8 @@ module.exports = {
       file: {
         type: Sequelize.STRING
       },
-      file_name: {
-        type: Sequelize.STRING
-      },
       semester: {
         type: Sequelize.ENUM('1', '2')
-      },
-      category: {
-        allowNull: false,
-        defaultValue: 'rapor',
-        type: Sequelize.ENUM('rapor', 'ijazah')
       },
       createdAt: {
         allowNull: false,
@@ -62,6 +54,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Student_files');
+    await queryInterface.dropTable('Rapor_files');
   }
 };
