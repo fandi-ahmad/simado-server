@@ -21,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
     format: DataTypes.STRING,
     file: DataTypes.STRING,
     id_category: DataTypes.STRING,
+    entry_file: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'File',

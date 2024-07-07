@@ -5,7 +5,7 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.sequelize.query(/*sql*/`
       CREATE OR REPLACE VIEW view_files AS
-      SELECT files.id, files.file, files.file_name, files.number, files.source, files.format, files.createdAt, files.updatedAt, category_files.id AS id_category, category_files.name AS category_name
+      SELECT files.id, files.file, files.file_name, files.entry_file, files.number, files.source, files.format, files.createdAt, files.updatedAt, category_files.id AS id_category, category_files.name AS category_name
       FROM files
       LEFT JOIN category_files ON files.id_category = category_files.id;
     `);

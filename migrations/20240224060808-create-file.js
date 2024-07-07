@@ -15,6 +15,9 @@ module.exports = {
       file_name: {
         type: Sequelize.STRING
       },
+      entry_file: {
+        type: Sequelize.STRING
+      },
       number: {
         type: Sequelize.STRING
       },

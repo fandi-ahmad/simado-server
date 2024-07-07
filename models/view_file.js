@@ -23,7 +23,8 @@ module.exports = (sequelize, DataTypes) => {
     createdAt: DataTypes.STRING,
     updatedAt: DataTypes.STRING,
     id_category: DataTypes.STRING,
-    category_name: DataTypes.STRING
+    category_name: DataTypes.STRING,
+    entry_file: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'view_file',
